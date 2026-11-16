@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Birthday 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Hind+Siliguri:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#2b0f33;--bg2:#4a1747;--rose:#ff5d8f;--gold:#ffd27a;--paper:#fff4f0;--ink:#3b1636;--text:#ffe9ef;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="light"]){color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg1:#ffd9e4;--bg2:#ffb3c8;--text:#4a1747}}
+:root[data-theme="dark"]{--bg1:#2b0f33;--bg2:#4a1747;--text:#ffe9ef}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Hind Siliguri",system-ui,sans-serif;color:var(--text);background:radial-gradient(circle at 50% 30%,var(--bg2),var(--bg1) 75%);display:flex;align-items:center;justify-content:center;overflow-x:hidden;overflow-y:auto;min-height:100dvh;padding:24px 0}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:5}
+.stage{width:min(92vw,420px);margin:auto;text-align:center;position:relative;z-index:2}
+.hint{font-family:Caveat,cursive,sans-serif;font-size:2rem;margin:0 0 1.2rem}
+.env{position:relative;width:100%;aspect-ratio:1.5;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit}
+.env .body{position:absolute;inset:0;background:linear-gradient(160deg,#ff7aa2,#e23d78);border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.env .flap{position:absolute;left:0;right:0;top:0;height:58%;background:#ff93b3;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .7s ease;border-radius:10px 10px 0 0}
+.env .seal{position:absolute;left:50%;top:48%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:var(--gold);color:#b2174f;display:flex;align-items:center;justify-content:center;font-size:1.6rem;z-index:3;transition:opacity .3s}
+.env:focus-visible{outline:3px solid var(--gold);outline-offset:6px}
+.opened .flap{transform:rotateX(180deg)}
+.opened .seal{opacity:0}
+.opened .env{pointer-events:none}
+.letter{display:none;background:var(--paper);color:var(--ink);border-radius:14px;padding:1.6rem 1.4rem;box-shadow:0 18px 40px rgba(0,0,0,.35);text-align:left}
+.opened .letter{display:block;animation:rise .8s ease both}
+.opened .hint,.opened .env{display:none}
+@keyframes rise{from{transform:translateY(40px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+h1{font-family:Caveat,cursive,sans-serif;font-size:2.6rem;line-height:1.1;margin:0 0 .6rem;color:#d12468}
+p{line-height:1.7;margin:.5rem 0;font-size:1.05rem}
+.sign{font-family:Caveat,cursive,sans-serif;font-size:1.8rem;margin-top:1rem;color:#d12468}
+button.again{margin-top:1rem;background:#d12468;color:#fff;border:0;border-radius:999px;padding:.6rem 1.2rem;font:inherit;cursor:pointer}
+.share-status{font-size:.85rem;line-height:1.5;overflow-wrap:anywhere;color:#813459}.share-area{margin-top:.6rem}button.again:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.env .flap{transition:none}.opened .letter{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<main class="stage" id="stage">
+  <p class="hint">Tomar jonno ekta chhoto surprise 💌</p>
+  <button class="env" id="env" aria-label="Chithi kholo">
+    <span class="body"></span><span class="flap"></span><span class="seal">❤</span>
+  </button>
+  <section class="letter" aria-live="polite">
+    <h1 id="title"></h1>
+    <p>আজ তোমার দিন, আর আমার কাছে পুরো পৃথিবীর সবচেয়ে সুন্দর দিন। তুমি আমার জীবনে আসার পর থেকে সবকিছু আরও রঙিন হয়ে গেছে।</p>
+    <p>তোমার হাসি, তোমার পাগলামি আর তোমার যত্ন, এই সবকিছুর জন্য আমি প্রতিদিন কৃতজ্ঞ। আজকের দিনটা তোমার মতোই সুন্দর হোক।</p>
+    <p>Happy Birthday, amar shob kichhu. Ami tomake onek, onek bhalobashi. ❤</p>
+    <div class="sign">Always yours</div>
+    <button class="again" id="song">Gaan chalao 🎵</button> <button class="again" id="again">Abar confetti 🎉</button>
+    <div class="share-area"><button class="again" id="share" type="button">Share 💌</button> <button class="again" id="copy" type="button">Copy Link 🔗</button><p id="share-status" role="status" class="share-status"></p></div>
+  </section>
+</main>
+<script>
+(function(){
+  var NAME="Lisa";
+  document.getElementById("title").textContent="Happy Birthday, "+NAME+" 🎂";
+  var stage=document.getElementById("stage"),cv=document.getElementById("c"),cx=cv.getContext("2d"),bits=[],run=false;
+  var cols=["#ff5d8f","#ffd27a","#ffffff","#b98cff","#6fe3c1"];
+  function size(){cv.width=innerWidth;cv.height=innerHeight}
+  size();addEventListener("resize",size);
+  function burst(){
+    for(var i=0;i<160;i++){bits.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,s:5+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[i%cols.length],h:Math.random()<.3})}
+    if(!run){run=true;requestAnimationFrame(tick)}
+  }
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    bits=bits.filter(function(b){return b.y<cv.height+30});
+    bits.forEach(function(b){
+      b.x+=b.vx;b.y+=b.vy;b.r+=b.vr;
+      cx.save();cx.translate(b.x,b.y);cx.rotate(b.r);cx.fillStyle=b.c;
+      if(b.h){cx.font=b.s*2+"px sans-serif";cx.fillText("❤",0,0)}else{cx.fillRect(-b.s/2,-b.s/2,b.s,b.s*.6)}
+      cx.restore();
+    });
+    if(bits.length){requestAnimationFrame(tick)}else{run=false}
+  }
+  document.getElementById("env").addEventListener("click",function(){
+    stage.classList.add("opened");
+    if(!matchMedia("(prefers-reduced-motion:reduce)").matches){burst()}
+  });
+  document.getElementById("again").addEventListener("click",burst);
+  function publicLink(){return /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)}
+  var status=document.getElementById("share-status");
+  function linkMessage(){status.textContent="এই ফাইলটি আগে Netlify Drop বা GitHub Pages-এ আপলোড করো। তারপর ওয়েবসাইটের লিংক শেয়ার করা যাবে। file:/// লিংক অন্য ফোনে কাজ করবে না।"}
+  document.getElementById("copy").addEventListener("click",async function(){
+    if(!publicLink()){linkMessage();return}
+    try{await navigator.clipboard.writeText(location.href);status.textContent="লিংক কপি হয়েছে!"}
+    catch(e){status.textContent="এই লিংকটি কপি করো: "+location.href}
+  });
+  document.getElementById("share").addEventListener("click",async function(){
+    if(!publicLink()){linkMessage();return}
+    if(navigator.share){try{await navigator.share({title:document.title,text:"A birthday surprise for you 💌",url:location.href})}catch(e){if(e.name!=="AbortError")status.textContent="Copy Link বাটন ব্যবহার করো।"}}
+    else{try{await navigator.clipboard.writeText(location.href);status.textContent="শেয়ার করার লিংক কপি হয়েছে!"}catch(e){status.textContent="এই লিংকটি শেয়ার করো: "+location.href}}
+  });
+  var ac;
+  document.getElementById("song").addEventListener("click",function(){
+    try{
+      ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+      var q=[[392,.75],[392,.25],[440,1],[392,1],[523,1],[494,2],[392,.75],[392,.25],[440,1],[392,1],[587,1],[523,2],[392,.75],[392,.25],[784,1],[659,1],[523,1],[494,1],[440,1],[698,.75],[698,.25],[659,1],[523,1],[587,1],[523,2]];
+      var t=ac.currentTime+.1;
+      q.forEach(function(n){
+        var d=n[1]*.45,o=ac.createOscillator(),g=ac.createGain();
+        o.type="triangle";o.frequency.value=n[0];
+        g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.25,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+d);
+        o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);t+=d;
+      });
+      burst();
+    }catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
